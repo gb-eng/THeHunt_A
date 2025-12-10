@@ -1,0 +1,4 @@
+.buttonBounce {
+    transition: transform 0.2s ease-out;
+    transform: scale(1.1);
+}

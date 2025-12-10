@@ -1,0 +1,14 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Scenes/responsive.uss?fileID=7433441132597879392&amp;guid=f7e6fd08024e4ad42b28f082fad89109&amp;type=3#responsive" />
+    <Style src="project://database/Assets/Scenes/css_popup.uss?fileID=7433441132597879392&amp;guid=faa93ac298b5dc44d94cc0acf712af89&amp;type=3#css_popup" />
+    <ui:VisualElement name="popup-overlay" class="popup-overlay" style="-unity-font-definition: url(&quot;project://database/Library/unity%20default%20resources?fileID=10102&amp;guid=0000000000000000e000000000000000&amp;type=0#LegacyRuntime&quot;);">
+        <ui:VisualElement name="popup-box" enabled="true" class="popup-box" style="width: 60%; height: 30%; -unity-font-definition: url(&quot;project://database/Library/unity%20default%20resources?fileID=10102&amp;guid=0000000000000000e000000000000000&amp;type=0#LegacyRuntime&quot;); align-self: center; align-content: center; flex-wrap: wrap;">
+            <ui:Label name="popup-title" text="NOTICE" enabled="true" focusable="true" class="popup-title" style="-unity-font-definition: url(&quot;project://database/Assets/TextMesh%20Pro/Fonts/StepalangeShort-p7GZd.otf?fileID=12800000&amp;guid=11d6786e8fee6bc4b82c98a6ee1e3f21&amp;type=3#StepalangeShort-p7GZd&quot;);" />
+            <ui:Label name="popup-message" text="This is a sample message." enable-rich-text="true" class="popup-message" />
+            <ui:VisualElement name="popup-buttons" class="popup-buttons">
+                <ui:Button name="popup-confirm" text="OK" class="popup-button" style="-unity-text-align: middle-center; width: 80%; height: 200%; background-image: url(&quot;project://database/Assets/UI/mainbutton.png?fileID=2800000&amp;guid=fb43970c715febd41bfbb193cd7d7703&amp;type=3#mainbutton&quot;); top: auto; left: 4%;" />
+                <ui:Button name="popup-cancel" style="background-image: url(&quot;project://database/Assets/UI/x.svg?fileID=7388822144124034973&amp;guid=e0463b01629dc814b898281e3a7a6b87&amp;type=3#x&quot;); background-color: rgb(255, 255, 255); -unity-background-image-tint-color: rgb(146, 43, 33); position: relative; top: -610%; bottom: auto; left: 0%; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; background-size: 200% 200%; height: 40px; width: 42px;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,10 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/Scenes/museum/uss_museum.uss?fileID=7433441132597879392&amp;guid=45b7eb66998e4eb4c842aa352fa389b3&amp;type=3#uss_museum" />
+    <ui:VisualElement name="museumRoot" class="museum-root">
+        <ui:Button name="backbutton_D" style="position: relative; width: 10%; height: 5%; border-left-color: rgba(149, 149, 149, 0); border-right-color: rgba(149, 149, 149, 0); border-top-color: rgba(149, 149, 149, 0); border-bottom-color: rgba(149, 149, 149, 0); background-image: url(&quot;project://database/Assets/UI/button1.png?fileID=1086331387851373080&amp;guid=4c17c9a651ee4234a860abda1f598388&amp;type=3#button1_0&quot;); background-color: rgba(255, 255, 255, 0); -unity-background-scale-mode: stretch-to-fill; top: 5%; left: -79%; -unity-background-image-tint-color: rgb(236, 139, 0); color: rgb(240, 236, 233);">
+            <ui:VisualElement name="arIcon" style="flex-grow: 1; background-image: url(&quot;project://database/Assets/UI/backspace-fill%201.svg?fileID=7388822144124034973&amp;guid=e020e529201627a428b645c8927867a8&amp;type=3#backspace-fill 1&quot;); position: absolute; color: rgb(240, 236, 233); -unity-background-image-tint-color: rgb(240, 236, 233); height: 100%; width: 100%; background-size: 45% 40%; top: -2px; left: -2px;" />
+        </ui:Button>
+        <ui:VisualElement name="slotContainer" class="slot-container" style="flex-grow: 1;" />
+        <ui:ScrollView name="carousel" mode="Horizontal" nested-interaction-kind="StopPropagation" class="carousel" style="top: 0%; background-color: rgb(34, 27, 27); border-left-color: rgb(61, 60, 59); border-right-color: rgb(61, 60, 59); border-top-color: rgb(61, 60, 59); border-bottom-color: rgb(61, 60, 59);" />
+    </ui:VisualElement>
+</ui:UXML>

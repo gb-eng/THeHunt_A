@@ -1,0 +1,79 @@
+/* ROOT CONTAINER */
+.museum-root {
+    width: 100%;
+    height: 100%;
+    justify-content: flex-end; /* Pushes everything to bottom */
+    align-items: flex-end;     /* Aligns to bottom edge */
+    background-color: rgba(0,0,0,0);
+}
+
+/* THE SLIDER (Docked at Bottom) */
+.carousel {
+    height: 280px;             /* Fixed height for the dock */
+    width: 100%;               /* Full Width */
+    background-color: rgb(255, 255, 255);
+    border-top-left-radius: 30px;  /* Rounded top corners only */
+    border-top-right-radius: 30px;
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+    flex-direction: row;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 20px;
+    padding-bottom: 0px;       /* No padding at bottom */
+    border-top-width: 4px;
+    border-color: #ff9901;     /* Orange accent line on top */
+}
+
+/* ITEMS inside the slider */
+.carousel-item {
+    width: 180px;
+    height: 240px;
+    margin-right: 15px;
+    background-color: rgb(245, 245, 245);
+    border-radius: 15px;
+    align-items: center;
+    justify-content: flex-end;
+    border-width: 1px;
+    border-color: rgba(0,0,0,0.1);
+    margin-bottom: 20px; /* Lift items slightly off bottom */
+}
+
+/* BUTTON ROW */
+.button-row {
+    flex-direction: row;
+    width: 100%;
+    height: 50px;
+}
+
+/* BUTTONS */
+.btn-place, .btn-remove {
+    flex-grow: 1;
+    height: 100%;
+    font-size: 18px;
+    border-width: 0px;
+    -unity-font-style: bold;
+    color: white;
+    border-radius: 0px;
+}
+
+.btn-place { background-color: #ff9901; }
+.btn-remove { background-color: #d63031; }
+
+/* Style the Scroller Track */
+.unity-scroller--horizontal {
+    height: 15px;
+    margin-top: 5px;
+}
+
+/* Style the Slider Handle (The part that moves) */
+.unity-scroller--horizontal .unity-base-slider__dragger {
+    background-color: #ff9901; /* Orange */
+    border-radius: 5px;
+}
+
+/* Hide the Low/High Buttons (Optional arrows on the scrollbar) */
+.unity-scroller--horizontal .unity-scroller__low-button,
+.unity-scroller--horizontal .unity-scroller__high-button {
+    display: none;
+}

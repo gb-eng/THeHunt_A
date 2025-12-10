@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &333093220786565264
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8251091669261705523}
+  - component: {fileID: 5544967455246143995}
+  m_Layer: 0
+  m_Name: PersonalMuseumController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8251091669261705523
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 333093220786565264}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1000, y: -1000, z: -999}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5544967455246143995
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 333093220786565264}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f8d1c794df46014ab6e0e3575e47270, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PersonalMuseumController
+  slotAnchors: []
+  defaultScale: {x: 1, y: 1, z: 1}
+  defaultRotation: {x: 0, y: 0, z: 0}
+  modelAdjustments:
+  - itemId: 
+    localScale: {x: 0.1, y: 0, z: 0}
+    localRotation: {x: 0, y: 0, z: 0}
+  - itemId: basilica
+    localScale: {x: 100, y: 100, z: 100}
+    localRotation: {x: 0, y: 0, z: 0}
+  - itemId: empanadas
+    localScale: {x: 5, y: 5, z: 5}
+    localRotation: {x: 0, y: 90, z: 0}
+  - itemId: MarcelaVase
+    localScale: {x: 100, y: 100, z: 100}
+    localRotation: {x: 0, y: 0, z: 0}
+  uiDocument: {fileID: 0}

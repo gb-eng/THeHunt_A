@@ -1,0 +1,10 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Scenes/splash_screen_SS.uss?fileID=7433441132597879392&amp;guid=05b56be9a0199fa4a997b6d9b9343e7d&amp;type=3#splash_screen_SS" />
+    <Style src="project://database/Assets/Scenes/styles.uss?fileID=7433441132597879392&amp;guid=576ba64cae312e14c8ea82b68d24c025&amp;type=3#styles" />
+    <Style src="project://database/Assets/UI/loadingBar.uss?fileID=7433441132597879392&amp;guid=30e5031da3e8b004ab57d3aa929b84d5&amp;type=3#loadingBar" />
+    <ui:VisualElement name="splashContainer" style="flex-grow: 1; background-image: none;">
+        <ui:Button name="backbutton_D" style="position: absolute; width: 10%; height: 5%; border-left-color: rgba(149, 149, 149, 0); border-right-color: rgba(149, 149, 149, 0); border-top-color: rgba(149, 149, 149, 0); border-bottom-color: rgba(149, 149, 149, 0); background-image: url(&quot;project://database/Assets/UI/button1.png?fileID=1086331387851373080&amp;guid=4c17c9a651ee4234a860abda1f598388&amp;type=3#button1_0&quot;); background-color: rgba(255, 255, 255, 0); -unity-background-scale-mode: stretch-to-fill; -unity-slice-left: 1; -unity-slice-top: 1; -unity-slice-right: 1; -unity-slice-bottom: 1; -unity-slice-type: sliced; -unity-slice-scale: 1px; top: 117px; left: 90px; -unity-background-image-tint-color: rgb(236, 139, 0); color: rgb(240, 236, 233);">
+            <ui:VisualElement name="arIcon" style="flex-grow: 1; background-image: url(&quot;project://database/Assets/UI/backspace-fill%201.svg?fileID=7388822144124034973&amp;guid=e020e529201627a428b645c8927867a8&amp;type=3#backspace-fill 1&quot;); position: absolute; color: rgb(240, 236, 233); -unity-background-image-tint-color: rgb(240, 236, 233); height: 100%; width: 100%; background-size: 45% 40%; top: -2px; left: -2px;" />
+        </ui:Button>
+    </ui:VisualElement>
+</ui:UXML>

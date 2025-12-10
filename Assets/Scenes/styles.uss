@@ -1,0 +1,11 @@
+.rounded-corners {
+}
+
+.roundedButton {
+}
+
+.unity-progress-bar_progress {
+    background-color: rgb(172, 0, 0);
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+    background-image: none;
+}

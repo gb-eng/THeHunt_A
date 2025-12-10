@@ -1,0 +1,29 @@
+/* =====================================================
+   BOUNCY BUTTON ANIMATIONS
+   ===================================================== */
+
+Button {
+    /* 1. The "Spring Back" Effect */
+    transition-property: scale;
+    transition-duration: 0.2s; /* Slightly longer to show the wobble */
+    transition-timing-function: ease-out-back; /* The magic "overshoot" curve */
+    
+    transform-origin: center;
+    scale: 1 1;
+}
+
+/* 2. Pressed State (Deep Squish) */
+Button:active {
+    /* Shrink to 90% size (was 92%) for more impact */
+    scale: 0.9 0.9;
+    
+    /* Snap down instantly */
+    transition-duration: 0.05s;
+    transition-timing-function: ease-out;
+}
+
+/* 3. Hover State (Optional Lift) */
+Button:hover {
+    /* Grow to 105% (was 102%) */
+    scale: 1.05 1.05;
+}

@@ -1,0 +1,24 @@
+.splashButton {
+    -unity-font-definition: url("project://database/Assets/UI%20Toolkit/UnityThemes/UnityDefaultRuntimeTheme.tss?fileID=2230732570650464555&guid=be0c85e5cccf0f042b6124cdd01641d0&type=3#NotInter-Regular");
+    font-size: 20px;
+    color: rgb(226, 219, 204);
+    -unity-font-style: bold;
+    background-color: rgb(176, 55, 0);
+    text-shadow: 2px 2px 0 rgb(0, 0, 0);
+    -unity-text-outline-width: 0;
+    background-image: url("project://database/Assets/UI/mainbutton.png?fileID=2800000&guid=fb43970c715febd41bfbb193cd7d7703&type=3#mainbutton");
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+    background-position-x: center 0;
+    opacity: 1;
+    -unity-slice-type: sliced;
+    width: auto;
+    height: auto;
+}
+
+.centerPanel {
+}
+
+.resizeTextField {
+    padding-top: 0;
+    padding-bottom: 0;
+}
