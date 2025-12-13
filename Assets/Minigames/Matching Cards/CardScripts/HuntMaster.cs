@@ -16,7 +16,7 @@ public class HuntMaster : MonoBehaviour
     public Sprite[] batch2CardFaces; 
     
     [Header("Layout Settings")]
-    public Vector2 cardSize = new Vector2(250, 350); // Bigger cards
+    public Vector2 cardSize = new Vector2(250, 350); 
     public Vector2 spacing = new Vector2(30, 30);
     
     [Header("Game Settings")]
@@ -32,6 +32,9 @@ public class HuntMaster : MonoBehaviour
     public Button nextBatchButton;
     public TextMeshProUGUI finalScoreText; 
 
+    [Header("Popup System")]
+    public script_popup popupManager; 
+
     private List<Card> allCards = new List<Card>();
     private Card firstFlippedCard;
     private Card secondFlippedCard;
@@ -43,6 +46,9 @@ public class HuntMaster : MonoBehaviour
     
     [System.Serializable]
     public class ScorePayload { public int user_id; public string game_id; public int score; }
+    
+    [System.Serializable]
+    public class UnlockPayload { public int user_id; public string marker_id; }
 
     void Awake() { Instance = this; }
 
@@ -51,6 +57,14 @@ public class HuntMaster : MonoBehaviour
         if (winPanel) winPanel.SetActive(false);
         if (losePanel) losePanel.SetActive(false);
         if (nextBatchButton) nextBatchButton.gameObject.SetActive(false);
+        
+        // ✅ FIXED: Updated to modern API (FindObjectOfType is obsolete)
+        if (popupManager == null) 
+        {
+            popupManager = FindFirstObjectByType<script_popup>();
+            if (popupManager == null) Debug.LogWarning("⚠️ script_popup not found in scene! Popups won't show.");
+        }
+        
         StartBatch(1);
     }
     
@@ -75,21 +89,15 @@ public class HuntMaster : MonoBehaviour
         UpdateScoreUI();
     }
     
-void CreateCards()
+    void CreateCards()
     {
         Sprite[] selectedBatch = (currentBatch == 1) ? batch1CardFaces : batch2CardFaces;
         
-        // SAFETY CHECK 1: Do we have the array?
-        if (selectedBatch == null || selectedBatch.Length == 0)
-        {
-            Debug.LogError("❌ STOP! Batch Card Faces array is empty in Inspector!");
-            return;
-        }
+        if (selectedBatch == null || selectedBatch.Length == 0) return;
 
         List<int> cardIDs = new List<int>();
         for (int i = 0; i < 5; i++) { cardIDs.Add(i); cardIDs.Add(i); }
 
-        // Shuffle logic (Same as before)
         for (int i = 0; i < cardIDs.Count; i++)
         {
             int temp = cardIDs[i];
@@ -98,10 +106,9 @@ void CreateCards()
             cardIDs[randomIndex] = temp;
         }
 
-        // Manual Layout Calculation
+        // Layout Logic
         int[] rowStructure = { 3, 3, 3, 1 }; 
         int currentCardIndex = 0;
-        
         float totalHeight = (rowStructure.Length * cardSize.y) + ((rowStructure.Length - 1) * spacing.y);
         float startY = totalHeight / 2f - (cardSize.y / 2f);
 
@@ -115,39 +122,16 @@ void CreateCards()
             for (int colIndex = 0; colIndex < countInRow; colIndex++)
             {
                 if (currentCardIndex >= cardIDs.Count) break;
-
                 int id = cardIDs[currentCardIndex];
                 
-                // Instantiate
                 GameObject cardObj = Instantiate(cardPrefab, cardGrid);
-                
-                // Position
                 RectTransform rt = cardObj.GetComponent<RectTransform>();
-                rt.anchorMin = new Vector2(0.5f, 0.5f);
-                rt.anchorMax = new Vector2(0.5f, 0.5f);
-                rt.pivot = new Vector2(0.5f, 0.5f);
-                rt.sizeDelta = cardSize;
+                rt.anchoredPosition = new Vector2(startX + (colIndex * (cardSize.x + spacing.x)), yPos); 
                 
-                float xPos = startX + (colIndex * (cardSize.x + spacing.x));
-                rt.anchoredPosition = new Vector2(xPos, yPos); // Uses Anchored Position (Good for UI)
-                rt.localScale = Vector3.one;
-
-                // Setup Data
                 Card card = cardObj.GetComponent<Card>();
-                if (card != null)
+                if (card != null && id < selectedBatch.Length)
                 {
-                    // SAFETY CHECK 2: Does the sprite exist?
-                    if (id < selectedBatch.Length)
-                    {
-                        Sprite face = selectedBatch[id];
-                        card.SetupCard(id, face, cardBackSprite);
-                    }
-                    else
-                    {
-                        Debug.LogError($"❌ MISSING SPRITE! You need 5 sprites, but tried to access index {id}.");
-                        // Assign a fallback or nothing to prevent crash
-                        card.SetupCard(id, null, cardBackSprite);
-                    }
+                    card.SetupCard(id, selectedBatch[id], cardBackSprite);
                     allCards.Add(card);
                 }
                 currentCardIndex++;
@@ -160,9 +144,6 @@ void CreateCards()
         foreach (Transform child in cardGrid) Destroy(child.gameObject);
         allCards.Clear();
     }
-    
-    // ... (Rest of the Logic: Flip, Match, API remains exactly the same) ...
-    // PASTE THE REST OF THE LOGIC FROM PREVIOUS SCRIPT HERE OR ASK ME IF YOU NEED IT AGAIN
     
     public bool CanFlipCard() { return !isChecking && gameActive; }
     
@@ -229,7 +210,18 @@ void CreateCards()
             if (finalScoreText) finalScoreText.text = "Score: " + score;
             
             int userId = PlayerPrefs.GetInt("user_id", 0);
-            if(userId != 0) StartCoroutine(SubmitScore(userId));
+            if(userId != 0) 
+            {
+                StartCoroutine(SubmitScore(userId));
+                StartCoroutine(UnlockReward(userId, "MKT_Empanadas"));
+                StartCoroutine(UnlockReward(userId, "MKT_Longganisa"));
+
+                // ✅ FIXED: Removed unused variable 'msg'
+                if(popupManager != null)
+                {
+                    popupManager.ShowPopup(PopupType.pop_success, null, "Awesome!"); 
+                }
+            }
         }
         else
         {
@@ -239,18 +231,24 @@ void CreateCards()
 
     IEnumerator SubmitScore(int userId)
     {
-        ScorePayload payload = new ScorePayload 
-        { 
-            user_id = userId, 
-            game_id = "matching_cards", 
-            score = score 
-        };
-
+        ScorePayload payload = new ScorePayload { user_id = userId, game_id = "matching_cards", score = score };
         if (APIManager.Instance != null)
         {
             yield return StartCoroutine(APIManager.Instance.PostRequest("/api/mobile-score", payload,
-                (res) => Debug.Log("Card Score Submitted!"),
-                (err) => Debug.LogError("Card Error: " + err)
+                (res) => Debug.Log("✅ Card Score Submitted!"),
+                (err) => Debug.LogError("❌ Card Score Error: " + err)
+            ));
+        }
+    }
+
+    IEnumerator UnlockReward(int userId, string itemId)
+    {
+        UnlockPayload payload = new UnlockPayload { user_id = userId, marker_id = itemId };
+        if (APIManager.Instance != null)
+        {
+            yield return StartCoroutine(APIManager.Instance.PostRequest("/api/mobile-unlock", payload,
+                (res) => Debug.Log($"✅ Reward Unlocked: {itemId}"),
+                (err) => Debug.LogError($"❌ Unlock Failed for {itemId}: {err}")
             ));
         }
     }

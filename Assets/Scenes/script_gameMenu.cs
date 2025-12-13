@@ -5,69 +5,70 @@ using UnityEngine.UIElements;
 public class script_gameMenu : MonoBehaviour
 {
     public UIDocument game_screen;
+
     void Start()
     {
+        if (game_screen == null) game_screen = GetComponent<UIDocument>();
         var root = game_screen.rootVisualElement;
+        
         Debug.Log("Game menu UI loaded. Searching for buttons...");
 
-        // Try to find buttons (add debug lines)
-        var game1 = root.Q<Button>("game1");
-        var game2 = root.Q<Button>("game2");
-        var game3 = root.Q<Button>("game3");
-        var game4 = root.Q<Button>("game4");
-        var game5 = root.Q<Button>("game5");
+        // Find Buttons
+        var game1 = root.Q<Button>("game1"); // Sew The Flag (MAR)
+        var game2 = root.Q<Button>("game2"); // Flavors (MKT)
+        var game3 = root.Q<Button>("game3"); // Trivia (BAS)
+        var game4 = root.Q<Button>("game4"); // Adventure (APA)
+        var game5 = root.Q<Button>("game5"); // Restore (CAS)
         var backBtn = root.Q<Button>("backbutton_D");
 
-        Debug.Log(game1 != null ? "Found game1 button ✅" : "❌ game1 button not found!");
-        Debug.Log(game2 != null ? "Found game2 button ✅" : "❌ game2 button not found!");
-        Debug.Log(game2 != null ? "Found game3 button ✅" : "❌ game3 button not found!");
-        Debug.Log(game2 != null ? "Found game4 button ✅" : "❌ game4 button not found!");
-        Debug.Log(game2 != null ? "Found game5 button ✅" : "❌ game5 button not found!");
-        Debug.Log(backBtn != null ? "Found backbutton_D ✅" : "❌ backbutton_D not found!");
+        // ✅ SETUP BUTTONS: Pass the "GAME_ID" that ARScanController unlocks
+        
+        SetupGameButton(game1, "GAME_FLAG", "SewScene", "Sew The Flag", 
+            "Tap the GOLD needles to sew the revolutionary flags! Avoid the RED needles or you will lose a life! Complete all 10 historic Philippine flags.");
 
-        // Hook up game buttons
-        if (game1 != null)
-            game1.clicked += () => SelectGame(
-                "SewScene",
-                "Sew The Flag",
-                "Tap the GOLD needles to sew the revolutionary flags! Avoid the RED needles or you will lose a life! Complete all 10 historic Philippine flags."
-            );
+        SetupGameButton(game2, "GAME_FLAVORS", "MatchingCardScene", "Memory of Flavors", 
+            "Flip the cards to find matching pairs of delicious Taal delicacies! Clear both sets of 10 cards to complete the game!");
 
-        if (game2 != null)
-            game2.clicked += () => SelectGame(
-                "MatchingCardScene",
-                "Memory of Flavors",
-                "Flip the cards to find matching pairs of delicious Taal delicacies! Clear both sets of 10 cards to complete the game!"
-            );
+        SetupGameButton(game3, "GAME_TRIVIA", "TriviaQuestScene", "Taal Trivia Quest", 
+            "Answer 10 questions about Taal, Batangas and prove your knowledge of Taal's rich culture and history!");
 
-        if (game3 != null)
-            game3.clicked += () => SelectGame(
-                "TriviaQuestScene",
-                "Taal Trivia Quest",
-                "Answer 10 questions about Taal, Batangas and prove your knowledge of Taal's rich culture and history!"
-            );
+        SetupGameButton(game4, "GAME_ADVENTURE", "EndlessRunScene", "Apacible's Adventure", 
+            "Guide Leon as far as you can in this endless runner minigame. The adventure ends when you hit 3 obstacles. Good luck!");
 
-        if (game4 != null)
-            game4.clicked += () => SelectGame(
-                "EndlessRunScene",
-                "Apacible's Adventure",
-                "Guide Leon as far as you can in this endless runner minigame. The adventure ends when you hit 3 obstacles. Good luck!"
-            );
+        SetupGameButton(game5, "GAME_RESTORE", "SlidingPuzzScene", "Restore the Heritage", 
+            "Slide the tiles to complete the picture! Tap a tile next to the empty space to move it. Arrange all pieces correctly to reveal beautiful Taal Heritage Sites.");
 
-        if (game5 != null)
-            game5.clicked += () => SelectGame(
-                "SlidingPuzzScene",
-                "Restore the Heritage",
-                "Slide the tiles to complete the picture! Tap a tile next to the empty space to move it. Arrange all pieces correctly to reveal beautiful Taal Heritage Sites."
-            );
-
-        // Back button
         if (backBtn != null)
-            backBtn.clicked += () =>
-            {
+        {
+            backBtn.clicked += () => {
                 Debug.Log("Loading D_mainScreen...");
                 SceneManager.LoadScene("D_mainScreen");
             };
+        }
+    }
+
+    void SetupGameButton(Button btn, string gameLockId, string sceneName, string title, string instructions)
+    {
+        if (btn == null) return;
+
+        // ✅ CHECK LOCK: "HasUnlocked_GAME_FLAG", etc.
+        bool isUnlocked = PlayerPrefs.GetInt("HasUnlocked_" + gameLockId, 0) == 1;
+
+        if (isUnlocked)
+        {
+            btn.style.opacity = 1f; 
+            btn.SetEnabled(true);
+            btn.clicked += () => SelectGame(sceneName, title, instructions);
+        }
+        else
+        {
+            btn.style.opacity = 0.5f; 
+            btn.clicked += () => {
+                Debug.Log($"🔒 {title} is locked. Scan the trigger artifact first.");
+                if (PopupManager.Instance != null)
+                    PopupManager.Instance.ShowReward("T_Locked", "Game Locked!", () => { });
+            };
+        }
     }
 
     void SelectGame(string sceneName, string title, string instructions)
@@ -84,8 +85,6 @@ public class script_gameMenu : MonoBehaviour
         script_gameManager.Instance.selectedTitle = title;
         script_gameManager.Instance.selectedInstructions = instructions;
 
-        // Works directly without loader instance
-        Debug.Log("Loading G_gameInstruct...");
         SceneManager.LoadScene("G_gameInstruct");
     }
 }
