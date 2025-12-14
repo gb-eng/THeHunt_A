@@ -10,8 +10,8 @@ public class ProgressController : MonoBehaviour
     [Header("UI Reference")]
     public UIDocument uiDocument;
 
-    // ✅ THE FIX: Accepts raw Texture files (Drag your images here!)
-    [Header("⚠️ DRAG ALL IMAGES HERE ⚠️")]
+    // ✅ MANUAL DATABASE
+    [Header(" DRAG ALL THUMBNAILS HERE ")]
     public List<Texture2D> allThumbnails; 
 
     private ProgressBar progressBar;
@@ -32,7 +32,6 @@ public class ProgressController : MonoBehaviour
     private int currentArtifactIndex = 0;
     private int currentAreaIndex = 0;
 
-    // Internal Cache
     private Dictionary<string, Sprite> spriteLookup = new Dictionary<string, Sprite>();
 
     private Dictionary<string, string[]> areaContentMap = new Dictionary<string, string[]>
@@ -44,6 +43,17 @@ public class ProgressController : MonoBehaviour
         { "Casa Real", new[] { "mrkr_casareal-min", "mrkr_real", "mrkr_casereal2-min" } }
     };
 
+    // ✅ FIXED: Market Trigger uses the Scene Poster
+    private Dictionary<string, string> retroactiveTriggers = new Dictionary<string, string>
+    {
+        { "mrkr_agoncillo_flag", "GAME_FLAG" },
+        { "mrkr_basilica-min", "GAME_TRIVIA" },
+        { "mrkr_apacible2-min", "GAME_ADVENTURE" },
+        { "mrkr_casareal-min", "GAME_RESTORE" },
+        { "mrkr_taalmarketplace2", "GAME_FLAVORS" } // ✅ New Trigger
+    };
+
+    // Translator for displaying clean names / finding T_ names
     private string GetThumbnailName(string vuforiaID)
     {
         switch (vuforiaID)
@@ -68,15 +78,6 @@ public class ProgressController : MonoBehaviour
         }
     }
 
-    private Dictionary<string, string> retroactiveTriggers = new Dictionary<string, string>
-    {
-        { "mrkr_agoncillo_flag", "GAME_FLAG" },
-        { "mrkr_basilica-min", "GAME_TRIVIA" },
-        { "mrkr_apacible2-min", "GAME_ADVENTURE" },
-        { "mrkr_casareal-min", "GAME_RESTORE" },
-        { "mrkr_taalmarketplace_empanada", "GAME_FLAVORS" }
-    };
-
     private List<string> areaNames; 
     private List<string> currentAreaItems = new List<string>();
 
@@ -85,20 +86,17 @@ public class ProgressController : MonoBehaviour
 
     void OnEnable()
     {
-        // ✅ AUTO-CONVERT TEXTURES TO SPRITES
+        // Build Sprite Cache
         spriteLookup.Clear();
         foreach (Texture2D tex in allThumbnails)
         {
             if (tex != null && !spriteLookup.ContainsKey(tex.name.ToUpper()))
             {
-                // Create a sprite from the texture
                 Sprite newSprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
-                newSprite.name = tex.name; // Keep the T_Name
-                
+                newSprite.name = tex.name; 
                 spriteLookup.Add(tex.name.ToUpper(), newSprite);
             }
         }
-        Debug.Log($"✅ Manual Database Ready: Loaded {spriteLookup.Count} thumbnails.");
 
         if (uiDocument == null) uiDocument = GetComponent<UIDocument>();
         var root = uiDocument.rootVisualElement;
@@ -135,13 +133,6 @@ public class ProgressController : MonoBehaviour
         StartCoroutine(LoadProgressData());
     }
 
-    Sprite FindSprite(string name)
-    {
-        if (spriteLookup.ContainsKey(name.ToUpper()))
-            return spriteLookup[name.ToUpper()];
-        return null;
-    }
-
     IEnumerator LoadProgressData()
     {
         int userId = PlayerPrefs.GetInt("user_id", 0);
@@ -159,6 +150,7 @@ public class ProgressController : MonoBehaviour
                     }
                     if (StoryManager.Instance != null)
                         StoryManager.Instance.RefreshChapterProgress(allUnlockedIds);
+                    
                     SyncMinigameUnlocks(allUnlockedIds);
                     UpdateAreaUI();
                 },
@@ -173,6 +165,8 @@ public class ProgressController : MonoBehaviour
         {
             string requiredItem = trigger.Key; 
             string gameToUnlock = trigger.Value; 
+            
+            // Check for match (Loose)
             if (unlockedItems.Exists(id => id.ToLower().Contains(requiredItem.ToLower()) || requiredItem.ToLower().Contains(id.ToLower())))
             {
                 if (PlayerPrefs.GetInt("HasUnlocked_" + gameToUnlock, 0) == 0)
@@ -249,9 +243,11 @@ public class ProgressController : MonoBehaviour
         if (isUnlocked)
         {
             string targetName = GetThumbnailName(rawVuforiaID);
-            Sprite thumb = FindSprite(targetName);
             
-            if (thumb != null) {
+            // Check cache
+            if (spriteLookup.ContainsKey(targetName.ToUpper()))
+            {
+                Sprite thumb = spriteLookup[targetName.ToUpper()];
                 artifactDisplay.style.backgroundImage = new StyleBackground(thumb);
                 artifactDisplay.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
                 artifactDisplay.style.rotate = new Rotate(new Angle(0, AngleUnit.Degree)); 
@@ -296,6 +292,7 @@ public class ProgressController : MonoBehaviour
             fragBtn.style.paddingBottom = 15;
             fragBtn.style.paddingLeft = 20;
             fragBtn.style.paddingRight = 20;
+            
             fragBtn.style.borderTopLeftRadius = 10;
             fragBtn.style.borderTopRightRadius = 10;
             fragBtn.style.borderBottomLeftRadius = 10;
@@ -304,6 +301,7 @@ public class ProgressController : MonoBehaviour
             fragBtn.style.borderBottomWidth = 0;
             fragBtn.style.borderLeftWidth = 0;
             fragBtn.style.borderRightWidth = 0;
+
             fragBtn.style.fontSize = 24;
             fragBtn.style.whiteSpace = WhiteSpace.Normal;
             fragBtn.style.unityTextAlign = TextAnchor.MiddleLeft;

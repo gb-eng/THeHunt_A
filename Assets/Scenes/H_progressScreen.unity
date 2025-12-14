@@ -594,6 +594,7 @@ MonoBehaviour:
   - {fileID: 2800000, guid: a6a37ced345b3d344be8bd483cc154d6, type: 3}
   - {fileID: 2800000, guid: 15f9054b0fa0acc46bd4dbe2ec41d580, type: 3}
   - {fileID: 2800000, guid: 54811a5444434424997d76a08cceff40, type: 3}
+  - {fileID: 2800000, guid: 56177ca6aab9d824c85eef5b092a644f, type: 3}
 --- !u!114 &1525605640 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6815481712848874685, guid: 085f7aa72a9434c45859642f9e8d2412,

@@ -1,0 +1,20 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:VisualElement name="bg" style="flex-grow: 1; background-color: rgb(20, 20, 20); align-items: center; justify-content: center;">
+        <ui:VisualElement name="story-panel" style="position: absolute; width: 100%; height: 100%; align-items: center; justify-content: flex-end; padding-bottom: 100px;">
+            <ui:VisualElement style="position: absolute; width: 100%; height: 100%; background-image: url('project://database/Assets/UI/splashbg_2.png'); -unity-background-image-tint-color: rgb(100,100,100);" />
+            <ui:VisualElement style="width: 90%; background-color: rgba(0, 0, 0, 0.8); border-radius: 20px; padding: 40px; border-width: 4px; border-color: rgb(200, 150, 50);">
+                <ui:Label name="story-text" text="..." style="color: white; font-size: 36px; white-space: normal; -unity-font-style: bold;" />
+                <ui:Label name="tap-hint" text="Tap to continue..." style="color: rgb(150, 150, 150); font-size: 24px; align-self: flex-end; margin-top: 20px;" />
+            </ui:VisualElement>
+            <ui:Button name="story-tap-area" style="position: absolute; width: 100%; height: 100%; opacity: 0;" />
+        </ui:VisualElement>
+        <ui:VisualElement name="tutorial-panel" style="display: none; width: 85%; height: 70%; background-color: white; border-radius: 30px; align-items: center; justify-content: space-between; padding: 50px;">
+            <ui:Label text="HOW TO PLAY" style="font-size: 50px; -unity-font-style: bold; color: rgb(200, 100, 0);" />
+            <ui:VisualElement style="align-items: center; justify-content: center; flex-grow: 1;">
+                <ui:Label name="slide-title" text="SCAN &amp; DISCOVER" style="font-size: 60px; -unity-font-style: bold; margin-bottom: 30px; color: rgb(50, 50, 50);" />
+                <ui:Label name="slide-desc" text="Use the AR Camera..." style="font-size: 32px; white-space: normal; text-align: center; color: rgb(80, 80, 80);" />
+            </ui:VisualElement>
+            <ui:Button name="next-slide-btn" text="NEXT" style="width: 100%; height: 100px; font-size: 40px; background-color: rgb(255, 153, 0); color: white; border-radius: 15px;" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

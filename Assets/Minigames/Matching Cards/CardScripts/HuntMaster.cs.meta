@@ -1,2 +1,23 @@
 fileFormatVersion: 2
 guid: 9c14d019797c34941ab61ccc55c86052
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - cardPrefab: {fileID: 5521171405820508390, guid: 5e9b0f089a8d18545bf63bb1a3ab7ac0,
+      type: 3}
+  - cardGrid: {instanceID: 0}
+  - cardBackSprite: {instanceID: 0}
+  - scoreText: {instanceID: 0}
+  - timerText: {instanceID: 0}
+  - batchText: {instanceID: 0}
+  - winPanel: {instanceID: 0}
+  - losePanel: {instanceID: 0}
+  - nextBatchButton: {instanceID: 0}
+  - finalScoreText: {instanceID: 0}
+  - popupManager: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

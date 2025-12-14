@@ -77,3 +77,10 @@
 .unity-scroller--horizontal .unity-scroller__high-button {
     display: none;
 }
+
+.carousel #unity-content-container {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    padding-right: 50px;
+}

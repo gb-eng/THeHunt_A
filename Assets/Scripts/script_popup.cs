@@ -21,7 +21,7 @@ public class script_popup : MonoBehaviour
     private Label popupTitle;
     private Label popupMessage;
     private Button confirmButton;
-    private Button cancelButton; // ✅ NEW
+    private Button cancelButton;
 
     private Dictionary<PopupType, (string title, string message, string button)> popupPresets;
     private int fadeDuration = 250;
@@ -34,6 +34,7 @@ public class script_popup : MonoBehaviour
         public PopupType type;
         public Action onConfirm;
         public string confirmLabel;
+        public string messageOverride; // ✅ NEW: Stores custom message
     }
     private PendingPopup pendingPopup = null;
 
@@ -55,7 +56,8 @@ public class script_popup : MonoBehaviour
             Debug.Log("[Popup] Found pending popup in Update, showing now...");
             var pending = pendingPopup;
             pendingPopup = null;
-            ShowPopup(pending.type, pending.onConfirm, pending.confirmLabel);
+            // ✅ PASS OVERRIDE
+            ShowPopup(pending.type, pending.onConfirm, pending.confirmLabel, pending.messageOverride);
         }
     }
 
@@ -75,7 +77,8 @@ public class script_popup : MonoBehaviour
             Debug.Log("[Popup] Found pending popup in DelayedInitialize");
             var pending = pendingPopup;
             pendingPopup = null;
-            ShowPopup(pending.type, pending.onConfirm, pending.confirmLabel);
+            // ✅ PASS OVERRIDE
+            ShowPopup(pending.type, pending.onConfirm, pending.confirmLabel, pending.messageOverride);
         }
     }
 
@@ -90,7 +93,8 @@ public class script_popup : MonoBehaviour
             Debug.Log("[Popup] Showing pending popup after activation");
             var pending = pendingPopup;
             pendingPopup = null;
-            ShowPopup(pending.type, pending.onConfirm, pending.confirmLabel);
+            // ✅ PASS OVERRIDE
+            ShowPopup(pending.type, pending.onConfirm, pending.confirmLabel, pending.messageOverride);
         }
     }
 
@@ -114,18 +118,7 @@ public class script_popup : MonoBehaviour
         popupTitle = root.Q<Label>("popup-title");
         popupMessage = root.Q<Label>("popup-message");
         confirmButton = root.Q<Button>("popup-confirm");
-        cancelButton = root.Q<Button>("popup-cancel"); // ✅ NEW
-
-        if (popupOverlay == null)
-            Debug.LogError("[Popup] 'popup-overlay' not found in UXML. Check the element name.");
-        if (popupTitle == null)
-            Debug.LogError("[Popup] 'popup-title' not found in UXML. Check the element name.");
-        if (popupMessage == null)
-            Debug.LogError("[Popup] 'popup-message' not found in UXML. Check the element name.");
-        if (confirmButton == null)
-            Debug.LogError("[Popup] 'popup-confirm' not found in UXML. Check the element name.");
-        if (cancelButton == null)
-            Debug.LogWarning("[Popup] 'popup-cancel' not found — optional but recommended.");
+        cancelButton = root.Q<Button>("popup-cancel");
 
         if (popupOverlay == null || popupTitle == null || popupMessage == null || confirmButton == null)
         {
@@ -133,7 +126,6 @@ public class script_popup : MonoBehaviour
             return;
         }
 
-        // ✅ Hook cancel button (optional)
         if (cancelButton != null)
         {
             cancelButton.clicked += () =>
@@ -162,11 +154,10 @@ public class script_popup : MonoBehaviour
         };
     }
 
-    public void ShowPopup(PopupType type, Action onConfirm = null, string confirmLabel = null)
+    // ✅ UPDATED SIGNATURE: Added messageOverride
+    public void ShowPopup(PopupType type, Action onConfirm = null, string confirmLabel = null, string messageOverride = null)
     {
         Debug.Log($"[Popup] ShowPopup called for type: {type}");
-        Debug.Log($"[Popup] GameObject active: {gameObject.activeInHierarchy}");
-        Debug.Log($"[Popup] Is initialized: {isInitialized}");
         
         if (!gameObject.activeInHierarchy)
         {
@@ -175,7 +166,8 @@ public class script_popup : MonoBehaviour
             {
                 type = type,
                 onConfirm = onConfirm,
-                confirmLabel = confirmLabel
+                confirmLabel = confirmLabel,
+                messageOverride = messageOverride // ✅ Store it
             };
             gameObject.SetActive(true);
             
@@ -189,7 +181,7 @@ public class script_popup : MonoBehaviour
         if (!isInitialized || root == null || popupOverlay == null)
         {
             Debug.LogWarning("[Popup] UI not ready yet. Retrying after initialization...");
-            StartCoroutine(RetryShowPopup(type, onConfirm, confirmLabel));
+            StartCoroutine(RetryShowPopup(type, onConfirm, confirmLabel, messageOverride));
             return;
         }
 
@@ -200,7 +192,10 @@ public class script_popup : MonoBehaviour
         }
 
         popupTitle.text = preset.title;
-        popupMessage.text = preset.message;
+        
+        // ✅ LOGIC: Use custom message if provided, else use preset
+        popupMessage.text = string.IsNullOrEmpty(messageOverride) ? preset.message : messageOverride;
+        
         confirmButton.text = confirmLabel ?? preset.button;
 
         popupOverlay.style.display = DisplayStyle.Flex;
@@ -214,14 +209,15 @@ public class script_popup : MonoBehaviour
         FadeInPopup();
     }
 
-    private IEnumerator RetryShowPopup(PopupType type, Action onConfirm, string confirmLabel)
+    // ✅ UPDATED: Pass messageOverride to retry
+    private IEnumerator RetryShowPopup(PopupType type, Action onConfirm, string confirmLabel, string messageOverride)
     {
         yield return null;
         yield return null;
         
         if (isInitialized)
         {
-            ShowPopup(type, onConfirm, confirmLabel);
+            ShowPopup(type, onConfirm, confirmLabel, messageOverride);
         }
         else
         {

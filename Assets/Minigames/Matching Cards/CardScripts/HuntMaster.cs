@@ -16,8 +16,8 @@ public class HuntMaster : MonoBehaviour
     public Sprite[] batch2CardFaces; 
     
     [Header("Layout Settings")]
-    public Vector2 cardSize = new Vector2(250, 350); 
-    public Vector2 spacing = new Vector2(30, 30);
+    public Vector2 cardSize = new Vector2(350, 450); 
+    public Vector2 spacing = new Vector2(50, 50);
     
     [Header("Game Settings")]
     public float flipBackDelay = 1f;
@@ -46,7 +46,6 @@ public class HuntMaster : MonoBehaviour
     
     [System.Serializable]
     public class ScorePayload { public int user_id; public string game_id; public int score; }
-    
     [System.Serializable]
     public class UnlockPayload { public int user_id; public string marker_id; }
 
@@ -58,11 +57,10 @@ public class HuntMaster : MonoBehaviour
         if (losePanel) losePanel.SetActive(false);
         if (nextBatchButton) nextBatchButton.gameObject.SetActive(false);
         
-        // ✅ FIXED: Updated to modern API (FindObjectOfType is obsolete)
         if (popupManager == null) 
         {
             popupManager = FindFirstObjectByType<script_popup>();
-            if (popupManager == null) Debug.LogWarning("⚠️ script_popup not found in scene! Popups won't show.");
+            if (popupManager == null) Debug.LogWarning("⚠️ script_popup not found in scene!");
         }
         
         StartBatch(1);
@@ -92,7 +90,6 @@ public class HuntMaster : MonoBehaviour
     void CreateCards()
     {
         Sprite[] selectedBatch = (currentBatch == 1) ? batch1CardFaces : batch2CardFaces;
-        
         if (selectedBatch == null || selectedBatch.Length == 0) return;
 
         List<int> cardIDs = new List<int>();
@@ -106,7 +103,6 @@ public class HuntMaster : MonoBehaviour
             cardIDs[randomIndex] = temp;
         }
 
-        // Layout Logic
         int[] rowStructure = { 3, 3, 3, 1 }; 
         int currentCardIndex = 0;
         float totalHeight = (rowStructure.Length * cardSize.y) + ((rowStructure.Length - 1) * spacing.y);
@@ -213,19 +209,54 @@ public class HuntMaster : MonoBehaviour
             if(userId != 0) 
             {
                 StartCoroutine(SubmitScore(userId));
-                StartCoroutine(UnlockReward(userId, "MKT_Empanadas"));
-                StartCoroutine(UnlockReward(userId, "MKT_Longganisa"));
-
-                // ✅ FIXED: Removed unused variable 'msg'
-                if(popupManager != null)
-                {
-                    popupManager.ShowPopup(PopupType.pop_success, null, "Awesome!"); 
-                }
+                CheckAndUnlockRewards(userId); // ✅ Checks score logic & constructs message
             }
         }
         else
         {
             if (losePanel) losePanel.SetActive(true);
+        }
+    }
+
+    void CheckAndUnlockRewards(int userId)
+    {
+        List<string> newlyUnlocked = new List<string>();
+
+        // 1. EMPANADAS (Condition: Win)
+        if (PlayerPrefs.GetInt("HasUnlocked_MKT_Empanadas", 0) == 0)
+        {
+            StartCoroutine(UnlockReward(userId, "MKT_Empanadas"));
+            newlyUnlocked.Add("Empanadas");
+            PlayerPrefs.SetInt("HasUnlocked_MKT_Empanadas", 1);
+        }
+
+        // 2. LONGGANISA (Condition: Win + Score >= 1500)
+        if (score >= 1500)
+        {
+            if (PlayerPrefs.GetInt("HasUnlocked_MKT_Longganisa", 0) == 0)
+            {
+                StartCoroutine(UnlockReward(userId, "MKT_Longganisa"));
+                newlyUnlocked.Add("Longganisa");
+                PlayerPrefs.SetInt("HasUnlocked_MKT_Longganisa", 1);
+            }
+        }
+
+        PlayerPrefs.Save();
+
+        // 3. SHOW POPUP WITH DETAILS
+        if (popupManager != null)
+        {
+            if (newlyUnlocked.Count > 0)
+            {
+                string items = string.Join(" & ", newlyUnlocked);
+                // ✅ Passes the custom message here
+                popupManager.ShowPopup(PopupType.pop_success, null, "Awesome!", "You unlocked: " + items);
+            }
+            else
+            {
+                string msg = (score < 1500) ? "Score 1500+ to unlock Longganisa!" : "Great match! No new rewards.";
+                popupManager.ShowPopup(PopupType.pop_success, null, "OK", msg);
+            }
         }
     }
 

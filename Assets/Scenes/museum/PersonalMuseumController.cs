@@ -2,47 +2,64 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
-using System.Globalization;
 
 public class PersonalMuseumController : MonoBehaviour
 {
     [Header("Scene References")]
-    // Drag Slot1, Slot2, Slot3, Slot4 here
     public Transform[] slotAnchors; 
 
     [Header("Global Defaults")]
     public Vector3 defaultScale = Vector3.one;
     public Vector3 defaultRotation = Vector3.zero;
 
-    [Header("Per-Item Overrides")]
-    // Add items here (e.g. "basilica") to fix their specific size/rotation
-    public List<ArtifactAdjustment> modelAdjustments; 
-
-    [System.Serializable]
-    public struct ArtifactAdjustment
-    {
-        public string itemId;         // e.g. "basilica"
-        public Vector3 localScale;    // e.g. (0.1, 0.1, 0.1)
-        public Vector3 localRotation; // e.g. (0, 180, 0)
-    }
-
     [Header("UI References")]
     public UIDocument uiDocument;
 
+    // ✅ MANUAL FIX (Keep this list filled!)
+    [Header("⚠️ DRAG ALL THUMBNAILS HERE ⚠️")]
+    public List<Texture2D> allThumbnails; 
+
     private VisualElement root;
     private ScrollView carousel;
+    private Button backBtn;
     
-    [System.Serializable]
-    public class ProgressResponse { public string[] unlocked_ids; }
-    [System.Serializable]
-    public class UserPayload { public int user_id; }
+    // Internal Cache
+    private Dictionary<string, Sprite> spriteLookup = new Dictionary<string, Sprite>();
+
+    [System.Serializable] public class ProgressResponse { public string[] unlocked_ids; }
+    [System.Serializable] public class UserPayload { public int user_id; }
 
     void OnEnable()
     {
         if (uiDocument == null) uiDocument = GetComponent<UIDocument>();
+        if (uiDocument == null) { Debug.LogError("❌ UI Document is NULL!"); return; }
         root = uiDocument.rootVisualElement;
-        carousel = root.Q<ScrollView>("carousel");
 
+        // --- 1. PRIORITY FIX: BACK BUTTON ---
+        // We bind this FIRST so it works 100% of the time.
+        backBtn = root.Q<Button>("backbutton_D");
+        if (backBtn != null)
+        {
+            backBtn.clicked += () => UnityEngine.SceneManagement.SceneManager.LoadScene("D_mainScreen");
+        }
+
+        // --- 2. PREPARE IMAGES ---
+        spriteLookup.Clear();
+        if (allThumbnails != null)
+        {
+            foreach (Texture2D tex in allThumbnails)
+            {
+                if (tex != null && !spriteLookup.ContainsKey(tex.name.ToUpper()))
+                {
+                    Sprite newSprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
+                    newSprite.name = tex.name; 
+                    spriteLookup.Add(tex.name.ToUpper(), newSprite);
+                }
+            }
+        }
+
+        // --- 3. START CONTENT LOADING ---
+        carousel = root.Q<ScrollView>("carousel");
         if (carousel != null)
         {
             carousel.Clear();
@@ -69,46 +86,82 @@ public class PersonalMuseumController : MonoBehaviour
         }
     }
 
+    private string GetCleanId(string rawId)
+    {
+        switch (rawId)
+        {
+            case "mrkr_basilica-min":       return "T_BAS_Basilica";
+            case "mrkr_basilica_statue":    return "T_BAS_Jesus";
+            case "basilicastoup":           return "T_BAS_Stoup";
+            case "mrkr_agoncillo_flag":     return "T_MAR_Sewing";
+            case "mrkr_agoncillo-min":      return "T_MAR_House";
+            case "mrkr_agoncillo_drawer":   return "T_MAR_Drawer";
+            case "mrkr_agoncillo_vase":     return "T_MAR_Vase";
+            case "mrkr_apacible2-min":      return "T_APA_House";
+            case "mrkr_apacible_sumbrero":  return "T_APA_Sumbrero";
+            case "mrkr_apacible_leon":      return "T_APA_Leon";
+            case "MKT_Empanadas":           return "T_MKT_Empanadas"; 
+            case "MKT_Longganisa":          return "T_MKT_Longganisa";
+            case "mrkr_taalmarketplace2":   return "T_MKT_Scene"; 
+            case "mrkr_casareal-min":       return "T_CAS_CasaReal";
+            case "mrkr_real":               return "T_CAS_MariaRosa";
+            case "mrkr_casereal2-min":      return "T_CAS_Marker"; 
+            default: return rawId;
+        }
+    }
+
     private void PopulateScrollList(string[] unlockedIds)
     {
         carousel.Clear(); 
 
-        foreach (string id in unlockedIds)
+        foreach (string rawId in unlockedIds)
         {
-            Sprite thumb = Resources.Load<Sprite>($"Thumbnails/{id}");
+            string cleanId = GetCleanId(rawId);
+            string modelName = cleanId.StartsWith("T_") ? "M_" + cleanId.Substring(2) : "M_" + cleanId;
+            
+            // Check Model
+            if (Resources.Load<GameObject>($"Models/{modelName}") == null) continue; 
 
-            // Container for one card
+            // Check Thumbnail
+            Sprite thumb = null;
+            if (spriteLookup.ContainsKey(cleanId.ToUpper())) thumb = spriteLookup[cleanId.ToUpper()];
+
+            // --- UI CARD ---
             var itemContainer = new VisualElement();
-            itemContainer.AddToClassList("carousel-item");
+            itemContainer.AddToClassList("carousel-item"); 
+            itemContainer.style.flexShrink = 0; 
             
             if (thumb != null) 
             {
                 itemContainer.style.backgroundImage = new StyleBackground(thumb);
                 itemContainer.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
                 itemContainer.style.backgroundRepeat = new BackgroundRepeat(Repeat.NoRepeat, Repeat.NoRepeat);
+                itemContainer.style.backgroundColor = Color.white;
+            }
+            else
+            {
+                // If this turns RED, it means the ID matches, but the image is missing from the Inspector list
+                itemContainer.style.backgroundColor = Color.red; 
             }
 
-            // Button Row
             var buttonRow = new VisualElement();
-            buttonRow.AddToClassList("button-row");
+            buttonRow.AddToClassList("button-row"); 
 
-            var placeBtn = new Button(() => TryPlaceItem(id, itemContainer));
+            var placeBtn = new Button(() => TryPlaceItem(modelName, itemContainer));
             placeBtn.text = "PLACE";
-            placeBtn.AddToClassList("btn-place");
+            placeBtn.AddToClassList("btn-place"); 
             placeBtn.name = "btn-place";
 
-            var removeBtn = new Button(() => RemoveItem(id, itemContainer));
+            var removeBtn = new Button(() => RemoveItem(modelName, itemContainer));
             removeBtn.text = "REMOVE";
-            removeBtn.AddToClassList("btn-remove");
-            removeBtn.name = "btn-remove";
-            removeBtn.style.display = DisplayStyle.None;
+            removeBtn.AddToClassList("btn-remove"); 
+            removeBtn.style.display = DisplayStyle.None; 
 
             buttonRow.Add(placeBtn);
             buttonRow.Add(removeBtn);
             itemContainer.Add(buttonRow);
             
-            // Update State if already placed
-            if (IsItemAlreadyPlaced(id))
+            if (IsItemAlreadyPlaced(modelName))
             {
                 placeBtn.style.display = DisplayStyle.None;
                 removeBtn.style.display = DisplayStyle.Flex;
@@ -119,137 +172,67 @@ public class PersonalMuseumController : MonoBehaviour
     }
 
     // --- 3D LOGIC ---
-
-    private void TryPlaceItem(string itemId, VisualElement uiItem)
+    private void TryPlaceItem(string modelName, VisualElement uiItem)
     {
-        if (IsItemAlreadyPlaced(itemId)) return;
-
+        if (IsItemAlreadyPlaced(modelName)) return;
         foreach (var slot in slotAnchors)
         {
-            if (!SlotHasModel(slot))
-            {
-                SpawnModel(itemId, slot, uiItem);
-                return;
-            }
+            if (!SlotHasModel(slot)) { SpawnModel(modelName, slot, uiItem); return; }
         }
-        Debug.Log("All slots full!");
     }
 
-    private void SpawnModel(string itemId, Transform slot, VisualElement uiItem)
+    private void SpawnModel(string modelName, Transform slot, VisualElement uiItem)
     {
-        GameObject prefab = Resources.Load<GameObject>($"Models/{itemId}");
-        
+        GameObject prefab = Resources.Load<GameObject>($"Models/{modelName}");
         if (prefab != null)
         {
-            // ✅ FIX: Find the specific "Pedestal" child (e.g. Pedestal1, Pedestal2)
-            Transform targetParent = slot; // Default to slot if nothing found
-            
-            foreach(Transform child in slot)
-            {
-                if (child.name.Contains("Pedestal"))
-                {
-                    targetParent = child;
-                    break;
-                }
-            }
+            Transform targetParent = slot;
+            foreach(Transform child in slot) if (child.name.Contains("Pedestal")) { targetParent = child; break; }
 
-            // Instantiate attached to the Pedestal
             GameObject instance = Instantiate(prefab, targetParent);
-            
-            // Reset Local Position so it sits ON TOP of the pedestal anchor
             instance.transform.localPosition = Vector3.zero;
-            
-            // Apply specific overrides from Inspector List
-            ArtifactAdjustment adj = modelAdjustments.Find(x => x.itemId == itemId);
-            
-            if (!string.IsNullOrEmpty(adj.itemId))
-            {
-                // Use specific settings
-                instance.transform.localScale = adj.localScale;
-                instance.transform.localRotation = Quaternion.Euler(adj.localRotation);
-            }
-            else
-            {
-                // Use defaults
-                instance.transform.localScale = defaultScale;
-                instance.transform.localRotation = Quaternion.Euler(defaultRotation);
-            }
-            
-            instance.name = itemId;
+            instance.transform.localScale = defaultScale;
+            instance.transform.localRotation = Quaternion.Euler(defaultRotation);
+            instance.name = modelName;
             instance.tag = "PlacedModel";
-
-            // Update UI
             ToggleButtons(uiItem, true);
-        }
-        else
-        {
-            Debug.LogError($"❌ Model not found: Resources/Models/{itemId}");
         }
     }
 
-    private void RemoveItem(string itemId, VisualElement uiItem)
+    private void RemoveItem(string modelName, VisualElement uiItem)
     {
         foreach (var slot in slotAnchors)
         {
-            // Search inside Slot OR inside Pedestal
-            Transform target = slot.Find(itemId);
-            
-            // If not found directly, check children (Pedestals)
-            if (target == null)
-            {
-                foreach(Transform child in slot)
-                {
-                    target = child.Find(itemId);
-                    if (target != null) break;
-                }
-            }
-
-            if (target != null)
-            {
-                Destroy(target.gameObject);
-                ToggleButtons(uiItem, false);
-                return;
-            }
+            Transform target = slot.Find(modelName);
+            if (target == null) foreach(Transform c in slot) { target = c.Find(modelName); if(target!=null) break; }
+            if (target != null) { Destroy(target.gameObject); ToggleButtons(uiItem, false); return; }
         }
     }
 
     private void ToggleButtons(VisualElement uiItem, bool isPlaced)
     {
-        var placeBtn = uiItem.Q<Button>("btn-place");
-        var removeBtn = uiItem.Q<Button>("btn-remove");
-
-        if (placeBtn != null) placeBtn.style.display = isPlaced ? DisplayStyle.None : DisplayStyle.Flex;
-        if (removeBtn != null) removeBtn.style.display = isPlaced ? DisplayStyle.Flex : DisplayStyle.None;
+        var placeBtn = uiItem.Q<Button>(className: "btn-place");
+        var removeBtn = uiItem.Q<Button>(className: "btn-remove");
+        if(placeBtn!=null) placeBtn.style.display = isPlaced ? DisplayStyle.None : DisplayStyle.Flex;
+        if(removeBtn!=null) removeBtn.style.display = isPlaced ? DisplayStyle.Flex : DisplayStyle.None;
     }
 
-    private bool IsItemAlreadyPlaced(string itemId)
+    private bool IsItemAlreadyPlaced(string modelName)
     {
         foreach (var slot in slotAnchors)
         {
-            // Check slot direct child
-            if (slot.Find(itemId) != null) return true;
-            
-            // Check pedestal child
-            foreach(Transform child in slot)
-            {
-                if (child.Find(itemId) != null) return true;
-            }
+            if (slot.Find(modelName) != null) return true;
+            foreach(Transform child in slot) if (child.Find(modelName) != null) return true;
         }
         return false;
     }
 
     private bool SlotHasModel(Transform slot)
     {
-        // Check slot direct child
         foreach (Transform child in slot)
         {
             if (child.CompareTag("PlacedModel")) return true;
-            
-            // Check grandchildren (items inside pedestal)
-            foreach(Transform grandChild in child)
-            {
-                if (grandChild.CompareTag("PlacedModel")) return true;
-            }
+            foreach(Transform grandChild in child) if (grandChild.CompareTag("PlacedModel")) return true;
         }
         return false;
     }
